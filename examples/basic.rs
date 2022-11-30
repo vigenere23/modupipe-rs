@@ -1,50 +1,59 @@
-use derive_new::new;
 use modupipe_rs::{
-    extractor::base::{Extractor, MappeableExtractor},
-    mapper::base::Mapper,
+    extractor::{Extractor, MappeableExtractor},
+    loader::Loader,
+    mapper::Mapper,
+    runner::{Pipeline, RangeRunner, Runner},
 };
-use rand::{rngs::ThreadRng, thread_rng, Rng};
 
-struct RandomExtractor {
-    random: ThreadRng,
+struct IncreasingExtractor {
+    value: u32,
 }
 
-impl RandomExtractor {
+impl IncreasingExtractor {
     pub fn new() -> Self {
-        Self {
-            random: thread_rng(),
-        }
+        Self { value: 0 }
     }
 }
 
-impl Extractor for RandomExtractor {
+impl Extractor for IncreasingExtractor {
     type Output = u32;
 
     fn get_next(&mut self) -> Self::Output {
-        self.random.gen()
+        let value = self.value;
+        self.value += 1;
+
+        value
     }
 }
 
-#[derive(new)]
 struct Double {}
 
-impl Mapper for Double {
-    type Input = u32;
+impl Mapper<u32> for Double {
     type Output = u64;
 
     fn map_next<E>(&mut self, extractor: &mut E) -> Self::Output
     where
-        E: Extractor<Output = Self::Input>,
+        E: Extractor<Output = u32>,
     {
         let value: u64 = extractor.get_next().into();
         value * 2
     }
 }
 
-fn main() {
-    let mut extractor = RandomExtractor::new().map(Double::new());
+struct ConsoleLogger {}
 
-    for _ in 1..10 {
-        println!("VALUE : {:?}", extractor.get_next());
+impl<Input: ToString> Loader<Input> for ConsoleLogger {
+    fn load(&mut self, item: Input) {
+        println!("VALUE : {}", item.to_string());
     }
+}
+
+fn main() {
+    let extractor = IncreasingExtractor::new().map(Double {});
+    let loader = ConsoleLogger {};
+    let pipeline = Pipeline::new(extractor, loader);
+
+    let mut runner = RangeRunner::new(pipeline, 10);
+
+    runner.run();
 }
