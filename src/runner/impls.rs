@@ -49,3 +49,21 @@ impl<R: Runner> Runner for RangeRunner<R> {
         }
     }
 }
+
+pub struct InfiniteRunner<R: Runner> {
+    runner: R,
+}
+
+impl<R: Runner> InfiniteRunner<R> {
+    pub fn new(runner: R) -> Self {
+        Self { runner }
+    }
+}
+
+impl<R: Runner> Runner for InfiniteRunner<R> {
+    fn run(&mut self) {
+        loop {
+            self.runner.run();
+        }
+    }
+}
