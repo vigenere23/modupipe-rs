@@ -12,3 +12,9 @@ impl<T> Queue<T> {
         Self { receiver, sender }
     }
 }
+
+impl<T> Default for Queue<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
