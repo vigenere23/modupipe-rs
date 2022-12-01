@@ -1,4 +1,4 @@
-# ModuPipe : A modular and extensible ETL-like pipeline builder
+# 🪠 ModuPipe : A modular and extensible ETL-like pipeline builder
 
 > 🚧 WORK IN PROGRESS 🚧
 
