@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use modupipe_rs::{
+use modupipe::{
     extractor::Extractor,
     loader::Loader,
     runner::{InfiniteRunner, Pipeline, Runner},

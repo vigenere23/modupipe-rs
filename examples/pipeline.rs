@@ -1,4 +1,4 @@
-use modupipe_rs::{
+use modupipe::{
     extractor::Extractor,
     loader::Loader,
     runner::{Pipeline, RangeRunner, Runner},

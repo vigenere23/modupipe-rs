@@ -1,4 +1,4 @@
-use modupipe_rs::extractor::Extractor;
+use modupipe::extractor::Extractor;
 
 struct Fibonacci {
     i: u32,

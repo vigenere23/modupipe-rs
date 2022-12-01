@@ -1,4 +1,4 @@
-use modupipe_rs::{
+use modupipe::{
     extractor::{Extractor, MappeableExtractor},
     mapper::Mapper,
 };

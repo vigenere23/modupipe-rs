@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "modupipe-rs"
-version = "0.0.2"
+name = "modupipe"
+version = "0.0.1"

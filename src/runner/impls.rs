@@ -1,3 +1,8 @@
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+};
+
 use crate::{extractor::Extractor, loader::Loader};
 
 use super::base::Runner;
@@ -9,6 +14,13 @@ where
 {
     extractor: E,
     loader: L,
+}
+
+unsafe impl<T, E, L> Send for Pipeline<T, E, L>
+where
+    E: Extractor<Output = T>,
+    L: Loader<T>,
+{
 }
 
 impl<T, E, L> Pipeline<T, E, L>
@@ -27,7 +39,8 @@ where
     L: Loader<T>,
 {
     fn run(&mut self) {
-        self.loader.load(self.extractor.get_next());
+        let item = self.extractor.get_next();
+        self.loader.load(item);
     }
 }
 
@@ -64,6 +77,37 @@ impl<R: Runner> Runner for InfiniteRunner<R> {
     fn run(&mut self) {
         loop {
             self.runner.run();
+        }
+    }
+}
+
+pub struct ConcurrentRunner {
+    runners: Vec<Arc<Mutex<dyn Runner + Send>>>,
+}
+
+unsafe impl Send for ConcurrentRunner {}
+
+impl ConcurrentRunner {
+    pub fn new(runners: Vec<Arc<Mutex<dyn Runner + Send>>>) -> Self {
+        Self { runners }
+    }
+}
+
+impl Runner for ConcurrentRunner {
+    fn run(&mut self) {
+        let threads: Vec<thread::JoinHandle<()>> = self
+            .runners
+            .iter()
+            .cloned()
+            .map(|runner| {
+                thread::spawn(move || {
+                    runner.lock().unwrap().run();
+                })
+            })
+            .collect();
+
+        for thread in threads {
+            thread.join().unwrap();
         }
     }
 }

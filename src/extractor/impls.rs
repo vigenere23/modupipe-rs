@@ -1,3 +1,5 @@
+use std::sync::mpsc::Receiver;
+
 use crate::mapper::Mapper;
 
 use super::Extractor;
@@ -45,5 +47,23 @@ impl<E: Extractor> MappeableExtractor<E> for E {
             extractor: self,
             mapper,
         }
+    }
+}
+
+pub struct GetFromQueue<T> {
+    receiver: Receiver<T>,
+}
+
+impl<T> GetFromQueue<T> {
+    pub fn new(receiver: Receiver<T>) -> Self {
+        Self { receiver }
+    }
+}
+
+impl<T> Extractor for GetFromQueue<T> {
+    type Output = T;
+
+    fn get_next(&mut self) -> Self::Output {
+        self.receiver.recv().unwrap()
     }
 }
